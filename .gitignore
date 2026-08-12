@@ -1,0 +1,6 @@
+# Source PDFs are local-only; generated JSON remains tracked.
+/*.pdf
+/data-source/**/*.pdf
+/data-sources/**/*.pdf
+/data/**/*.pdf
+/sources/**/*.pdf

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="一款清新、专注的 GRE 单词学习工具" />
+    <title>Vocabloom · GRE 单词花园</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Vocabloom 首页">
+          <span class="brand-mark" aria-hidden="true">V</span>
+          <span>vocabloom.</span>
+        </a>
+        <nav aria-label="主导航">
+          <button class="nav-link active" data-view="learn">学习</button>
+          <button class="nav-link" data-view="vocabulary">词汇库</button>
+          <button class="nav-link" data-view="synonyms">同义词</button>
+          <button class="nav-link" data-view="cards">闪卡</button>
+          <button class="nav-link" data-view="mistakes">易错本 <span class="nav-count" id="navMistakeCount">3</span></button>
+        </nav>
+        <div class="header-actions">
+          <button class="icon-button" id="searchButton" aria-label="搜索单词">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+          </button>
+          <button class="avatar" aria-label="个人中心">林</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" id="learnView">
+          <div class="hero">
+            <div>
+              <p class="eyebrow">WEDNESDAY · STUDY SESSION</p>
+              <h1>下午好，继续<br /><em>让词汇生长。</em></h1>
+              <p class="hero-copy" id="dailyMessage">每日按字母顺序学习 200 个单词，保持这份从容的节奏。</p>
+            </div>
+            <div class="daily-progress" id="dailyProgress" aria-label="今日进度 0%">
+              <div class="progress-ring" id="dailyProgressRing"><strong id="dailyPercent">0%</strong><span>今日进度</span></div>
+              <div><b><span id="todayLearned">0</span> / 200</b><span>今日已学</span></div>
+              <div><b>16 天</b><span>连续学习</span></div>
+            </div>
+          </div>
+
+          <section class="library-summary" aria-label="GRE 词库概览">
+            <div class="summary-copy"><span class="summary-icon">Aa</span><div><b>GRE 精选乱序词库</b><p id="librarySourceNote">正在加载真实 PDF 词库…</p></div></div>
+            <div class="summary-total"><strong id="heroWordTotal">—</strong><span>真实词汇总量</span></div>
+            <div class="summary-meter"><div><span id="learnedMeter" style="width:0"></span></div><p><b id="totalLearned">0</b> 个已学习 · 按 A–Z 顺序继续积累</p></div>
+            <button class="browse-button" data-view="vocabulary">浏览词库 <span>→</span></button>
+          </section>
+
+          <div class="study-layout">
+            <article class="word-card">
+              <div class="word-card-head">
+                <span class="level-pill" id="studySequence">GRE 核心 · NO. 0001</span>
+                <div class="card-actions">
+                  <button class="round-button" id="soundButton" aria-label="播放发音">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"></path><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"></path></svg>
+                  </button>
+                  <button class="round-button" id="bookmarkButton" aria-label="收藏单词">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v17l-6-4-6 4V4Z"></path></svg>
+                  </button>
+                </div>
+              </div>
+              <h2 id="studyWord">正在加载…</h2>
+              <p class="phonetic"><span id="studyPhonetic">—</span> <span>GRE WORD</span></p>
+              <div class="definition">
+                <span>01</span>
+                <div><h3 id="studyMeaning">正在读取真实词库</h3><p id="studyOrderHint">按字母顺序学习</p></div>
+              </div>
+
+              <div class="tabs" role="tablist">
+                <button class="tab active" data-tab="synonyms" role="tab">同义词族</button>
+                <button class="tab" data-tab="roots" role="tab">词根记忆</button>
+                <button class="tab" data-tab="examples" role="tab">例句 · 例题</button>
+              </div>
+              <div class="tab-panel active" id="synonymsPanel">
+                <p class="panel-label">SYNONYM MAP · 自定义同义词</p>
+                <div class="synonym-scale" id="studySynonyms"></div>
+                <div class="tip"><span>✦</span><p><b>记忆提示</b><span id="studyTip">先读单词和释义，再选择“不太记得”或“记住了”。</span></p></div>
+              </div>
+              <div class="tab-panel" id="rootsPanel">
+                <p class="panel-label">ROOT STORY · 拆解联想</p>
+                <div class="root-formula" id="studyRootFormula"></div>
+                <p class="root-note" id="studyRootNote"></p>
+                <div class="word-family" id="studyFamily"></div>
+              </div>
+              <div class="tab-panel" id="examplesPanel">
+                <p class="panel-label">CONTEXT · 语境记忆</p>
+                <blockquote id="studyExample">PDF 中不存在的字段将保持为空。</blockquote>
+                <p class="translation" id="studyTranslation">尝试先自己造句，再查看释义。</p>
+                <button class="quiz-button" id="quizButton">查看参考译文 <span>→</span></button>
+              </div>
+
+              <div class="word-footer">
+                <button class="skip-button" id="forgotButton">不太记得</button>
+                <button class="know-button" id="knowButton">记住了 <span>→</span></button>
+              </div>
+            </article>
+
+            <aside>
+              <section class="side-card goal-card">
+                <div class="side-title"><div><span class="tiny-icon">◎</span><b>本周目标</b></div><button>•••</button></div>
+                <div class="week-days"><div><span>一</span><i class="done">✓</i></div><div><span>二</span><i class="done">✓</i></div><div><span>三</span><i class="today">28</i></div><div><span>四</span><i></i></div><div><span>五</span><i></i></div><div><span>六</span><i></i></div><div><span>日</span><i></i></div></div>
+                <div class="week-progress"><span style="width: 58%"></span></div>
+                <p><b id="weekLearned">0</b> / 1,400 词 <span>每日目标 200</span></p>
+              </section>
+              <section class="side-card mistake-preview">
+                <div class="side-title"><div><span class="tiny-icon">!</span><b>近期易错</b></div><button data-view="mistakes" class="text-button">查看全部 →</button></div>
+                <div id="mistakePreview"></div>
+              </section>
+              <blockquote class="quote-card">“Words are, of course, the most powerful drug used by mankind.”<cite>— Rudyard Kipling</cite></blockquote>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view inner-view" id="vocabularyView">
+          <div class="section-heading library-heading">
+            <div><p class="eyebrow">GRE WORD LIBRARY</p><h1>GRE 精选词汇库</h1><p>内容从本地 PDF 完整解析，空缺字段不进行编造。</p></div>
+            <div class="library-total"><strong id="libraryWordTotal">—</strong><span>真实词汇总量</span></div>
+          </div>
+          <div class="library-controls">
+            <label class="library-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="librarySearch" type="search" placeholder="搜索单词或中文释义…" /></label>
+            <div class="alphabet-filter" id="alphabetFilter"></div>
+          </div>
+          <div class="word-library-card">
+            <div class="word-library-head"><span>单词、词性与释义</span><span>音标</span><span>学习状态</span></div>
+            <div id="wordLibraryList"></div>
+            <div class="pagination"><button id="previousWords" disabled>← 上一页</button><span id="wordPageInfo">第 1 页</span><button id="nextWords">下一页 →</button></div>
+          </div>
+        </section>
+
+        <section class="view inner-view" id="synonymsView">
+          <div class="section-heading">
+            <div><p class="eyebrow">SYNONYM COLLECTION</p><h1>同义词整理</h1><p>按核心含义成组记忆，辨析语气与使用场景。</p></div>
+            <div class="library-total"><strong id="synonymGroupTotal">0</strong><span>同义词组</span></div>
+          </div>
+          <div class="synonym-toolbar">
+            <label class="library-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="synonymSearch" type="search" placeholder="搜索含义或单词…" /></label>
+            <div class="synonym-tools"><div class="category-chips" id="synonymCategories"></div><button class="add-group-button" id="addGroupButton">＋ 新建组别</button></div>
+          </div>
+          <div class="synonym-grid" id="synonymGrid"></div>
+        </section>
+
+        <section class="view inner-view" id="cardsView">
+          <div class="section-heading"><div><p class="eyebrow">ACTIVE RECALL · A–Z</p><h1>单词闪卡</h1><p>按字母顺序学习；点击卡片翻面，凭第一印象判断掌握程度。</p></div><span class="session-count" id="cardSessionCount">今日 0 / 200</span></div>
+          <div class="flashcard-wrap">
+            <button class="flashcard" id="flashcard" aria-label="翻转闪卡">
+              <div class="flashcard-inner">
+                <div class="flash-face flash-front"><span id="cardSequence">GRE CORE</span><h2 id="cardWord">加载中</h2><p id="cardPhonetic">—</p><small>点击查看释义</small></div>
+                <div class="flash-face flash-back"><span>中文释义</span><h3 id="cardMeaning">正在读取词库</h3><p id="cardGroup">—</p><small>点击返回单词</small></div>
+              </div>
+            </button>
+            <div class="flash-actions"><button id="cardForgot">忘记了 <kbd>1</kbd></button><button id="cardFuzzy">有点模糊 <kbd>2</kbd></button><button class="primary" id="cardKnow">认识它 <kbd>3</kbd></button></div>
+          </div>
+        </section>
+
+        <section class="view inner-view" id="mistakesView">
+          <div class="section-heading"><div><p class="eyebrow">MISTAKE JOURNAL</p><h1>易错词归纳</h1><p>错误并不可怕，每一次回顾都在加深记忆。</p></div><div class="error-total"><strong id="totalErrors">10</strong><span>累计错误</span></div></div>
+          <div class="mistake-table-card">
+            <div class="mistake-toolbar"><b>全部易错词</b><div><button class="filter active">全部</button><button class="filter">高频错误</button><button class="filter">待复习</button></div></div>
+            <div id="mistakeList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="search-overlay" id="searchOverlay" aria-hidden="true">
+      <div class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="searchInput" placeholder="搜索单词、词根或中文释义…" /><button id="closeSearch">ESC</button></div>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <dialog class="editor-dialog" id="synonymEditor">
+      <form method="dialog" id="synonymForm">
+        <div class="dialog-head"><div><p class="eyebrow">CUSTOM COLLECTION</p><h2 id="editorTitle">新建同义词组</h2></div><button value="cancel" class="dialog-close" aria-label="关闭">×</button></div>
+        <input type="hidden" id="editingGroupId" />
+        <div class="form-grid"><label>组别名称<input id="groupMeaning" required placeholder="例如：赞扬称颂" /></label><label>分类<input id="groupCategory" required placeholder="例如：表达" /></label></div>
+        <label>辨析笔记<textarea id="groupNote" rows="3" required placeholder="记录这组词在语气和使用场景上的差别"></textarea></label>
+        <div class="word-editor-head"><b>组内单词</b><button type="button" id="addWordRow">＋ 添加单词</button></div>
+        <div id="wordEditorRows"></div>
+        <div class="dialog-actions"><button value="cancel" class="cancel-dialog">取消</button><button type="submit" value="default" class="save-group">保存组别</button></div>
+      </form>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
+</html>
