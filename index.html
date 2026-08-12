@@ -19,6 +19,8 @@
         </a>
         <nav aria-label="主导航">
           <button class="nav-link active" data-view="learn">学习</button>
+          <button class="nav-link" data-view="vocabulary">词汇库</button>
+          <button class="nav-link" data-view="synonyms">同义词</button>
           <button class="nav-link" data-view="cards">闪卡</button>
           <button class="nav-link" data-view="mistakes">易错本 <span class="nav-count" id="navMistakeCount">3</span></button>
         </nav>
@@ -36,19 +38,26 @@
             <div>
               <p class="eyebrow">WEDNESDAY · STUDY SESSION</p>
               <h1>下午好，继续<br /><em>让词汇生长。</em></h1>
-              <p class="hero-copy">今天的小目标还剩 12 个单词，保持这份从容的节奏。</p>
+              <p class="hero-copy" id="dailyMessage">每日按字母顺序学习 200 个单词，保持这份从容的节奏。</p>
             </div>
-            <div class="daily-progress" aria-label="今日进度 68%">
-              <div class="progress-ring"><strong>68%</strong><span>今日进度</span></div>
-              <div><b>28 / 40</b><span>今日已学</span></div>
+            <div class="daily-progress" id="dailyProgress" aria-label="今日进度 0%">
+              <div class="progress-ring" id="dailyProgressRing"><strong id="dailyPercent">0%</strong><span>今日进度</span></div>
+              <div><b><span id="todayLearned">0</span> / 200</b><span>今日已学</span></div>
               <div><b>16 天</b><span>连续学习</span></div>
             </div>
           </div>
 
+          <section class="library-summary" aria-label="GRE 词库概览">
+            <div class="summary-copy"><span class="summary-icon">Aa</span><div><b>GRE 精选乱序词库</b><p>已收录 PDF 全部词目</p></div></div>
+            <div class="summary-total"><strong id="heroWordTotal">6,485</strong><span>词汇总量</span></div>
+            <div class="summary-meter"><div><span id="learnedMeter" style="width:0"></span></div><p><b id="totalLearned">0</b> 个已学习 · 按 A–Z 顺序继续积累</p></div>
+            <button class="browse-button" data-view="vocabulary">浏览词库 <span>→</span></button>
+          </section>
+
           <div class="study-layout">
             <article class="word-card">
               <div class="word-card-head">
-                <span class="level-pill">GRE 核心 · NO. 0218</span>
+                <span class="level-pill" id="studySequence">GRE 核心 · NO. 0001</span>
                 <div class="card-actions">
                   <button class="round-button" id="soundButton" aria-label="播放发音">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"></path><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"></path></svg>
@@ -58,11 +67,11 @@
                   </button>
                 </div>
               </div>
-              <h2>equivocal</h2>
-              <p class="phonetic">/ɪˈkwɪvəkəl/ <span>adjective</span></p>
+              <h2 id="studyWord">abate</h2>
+              <p class="phonetic"><span id="studyPhonetic">/əˈbeɪt/</span> <span>GRE WORD</span></p>
               <div class="definition">
                 <span>01</span>
-                <div><h3>模棱两可的；含糊其辞的</h3><p>open to more than one interpretation; ambiguous</p></div>
+                <div><h3 id="studyMeaning">减轻；减少</h3><p id="studyOrderHint">按字母顺序学习 · A</p></div>
               </div>
 
               <div class="tabs" role="tablist">
@@ -72,26 +81,20 @@
               </div>
               <div class="tab-panel active" id="synonymsPanel">
                 <p class="panel-label">SYNONYM MAP · 含糊程度</p>
-                <div class="synonym-scale">
-                  <div><b>ambiguous</b><span>有多种解释</span></div>
-                  <i></i>
-                  <div class="highlight"><b>equivocal</b><span>刻意含糊</span></div>
-                  <i></i>
-                  <div><b>obscure</b><span>晦涩难懂</span></div>
-                </div>
-                <div class="tip"><span>✦</span><p><b>辨析提示</b>equivocal 常暗示说话者有意回避明确表态，而 ambiguous 不一定包含主观意图。</p></div>
+                <div class="synonym-scale" id="studySynonyms"></div>
+                <div class="tip"><span>✦</span><p><b>记忆提示</b><span id="studyTip">先读单词和释义，再选择“不太记得”或“记住了”。</span></p></div>
               </div>
               <div class="tab-panel" id="rootsPanel">
                 <p class="panel-label">ROOT STORY · 拆解联想</p>
-                <div class="root-formula"><b>equi</b><span>相等</span><strong>+</strong><b>voc</b><span>声音</span><strong>+</strong><b>al</b><span>形容词</span></div>
-                <p class="root-note">两种“声音”分量相等，让人无法判断立场 → 模棱两可的。</p>
-                <div class="word-family"><span>同根词</span><button>equivocate <small>v. 含糊其辞</small></button><button>equivocation <small>n. 模棱两可</small></button></div>
+                <div class="root-formula" id="studyRootFormula"></div>
+                <p class="root-note" id="studyRootNote"></p>
+                <div class="word-family" id="studyFamily"></div>
               </div>
               <div class="tab-panel" id="examplesPanel">
                 <p class="panel-label">CONTEXT · 语境记忆</p>
-                <blockquote>The senator gave an <mark>equivocal</mark> answer when asked about the controversial proposal.</blockquote>
-                <p class="translation">当被问及这项有争议的提案时，参议员给出了含糊其辞的回答。</p>
-                <button class="quiz-button" id="quizButton">查看 GRE 例题 <span>→</span></button>
+                <blockquote id="studyExample">Use <mark>abate</mark> in a sentence to strengthen active recall.</blockquote>
+                <p class="translation" id="studyTranslation">尝试先自己造句，再查看释义。</p>
+                <button class="quiz-button" id="quizButton">查看参考译文 <span>→</span></button>
               </div>
 
               <div class="word-footer">
@@ -105,7 +108,7 @@
                 <div class="side-title"><div><span class="tiny-icon">◎</span><b>本周目标</b></div><button>•••</button></div>
                 <div class="week-days"><div><span>一</span><i class="done">✓</i></div><div><span>二</span><i class="done">✓</i></div><div><span>三</span><i class="today">28</i></div><div><span>四</span><i></i></div><div><span>五</span><i></i></div><div><span>六</span><i></i></div><div><span>日</span><i></i></div></div>
                 <div class="week-progress"><span style="width: 58%"></span></div>
-                <p><b>108</b> / 200 词 <span>本周已完成 54%</span></p>
+                <p><b id="weekLearned">0</b> / 1,400 词 <span>每日目标 200</span></p>
               </section>
               <section class="side-card mistake-preview">
                 <div class="side-title"><div><span class="tiny-icon">!</span><b>近期易错</b></div><button data-view="mistakes" class="text-button">查看全部 →</button></div>
@@ -116,13 +119,41 @@
           </div>
         </section>
 
+        <section class="view inner-view" id="vocabularyView">
+          <div class="section-heading library-heading">
+            <div><p class="eyebrow">GRE WORD LIBRARY</p><h1>GRE 精选词汇库</h1><p>源自《GRE 词汇精选（乱序版）》的 6,485 个词目。</p></div>
+            <div class="library-total"><strong id="libraryWordTotal">6,485</strong><span>词汇总量</span></div>
+          </div>
+          <div class="library-controls">
+            <label class="library-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="librarySearch" type="search" placeholder="搜索单词或中文释义…" /></label>
+            <div class="alphabet-filter" id="alphabetFilter"></div>
+          </div>
+          <div class="word-library-card">
+            <div class="word-library-head"><span>单词与释义</span><span>同义词组</span><span>学习状态</span></div>
+            <div id="wordLibraryList"></div>
+            <div class="pagination"><button id="previousWords" disabled>← 上一页</button><span id="wordPageInfo">第 1 页</span><button id="nextWords">下一页 →</button></div>
+          </div>
+        </section>
+
+        <section class="view inner-view" id="synonymsView">
+          <div class="section-heading">
+            <div><p class="eyebrow">SYNONYM COLLECTION</p><h1>同义词整理</h1><p>按核心含义成组记忆，辨析语气与使用场景。</p></div>
+            <div class="library-total"><strong id="synonymGroupTotal">8</strong><span>同义词组</span></div>
+          </div>
+          <div class="synonym-toolbar">
+            <label class="library-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="synonymSearch" type="search" placeholder="搜索含义或单词…" /></label>
+            <div class="synonym-tools"><div class="category-chips" id="synonymCategories"></div><button class="add-group-button" id="addGroupButton">＋ 新建组别</button></div>
+          </div>
+          <div class="synonym-grid" id="synonymGrid"></div>
+        </section>
+
         <section class="view inner-view" id="cardsView">
-          <div class="section-heading"><div><p class="eyebrow">ACTIVE RECALL</p><h1>单词闪卡</h1><p>点击卡片翻面，凭第一印象判断掌握程度。</p></div><span class="session-count">今日 3 / 12</span></div>
+          <div class="section-heading"><div><p class="eyebrow">ACTIVE RECALL · A–Z</p><h1>单词闪卡</h1><p>按字母顺序学习；点击卡片翻面，凭第一印象判断掌握程度。</p></div><span class="session-count" id="cardSessionCount">今日 0 / 200</span></div>
           <div class="flashcard-wrap">
             <button class="flashcard" id="flashcard" aria-label="翻转闪卡">
               <div class="flashcard-inner">
-                <div class="flash-face flash-front"><span>GRE CORE · 0218</span><h2>equivocal</h2><p>/ɪˈkwɪvəkəl/</p><small>点击查看释义</small></div>
-                <div class="flash-face flash-back"><span>ADJECTIVE</span><h3>模棱两可的<br />含糊其辞的</h3><p>刻意不给出明确答案或立场</p><small>点击返回单词</small></div>
+                <div class="flash-face flash-front"><span id="cardSequence">GRE CORE · 0001</span><h2 id="cardWord">abate</h2><p id="cardPhonetic">/əˈbeɪt/</p><small>点击查看释义</small></div>
+                <div class="flash-face flash-back"><span>中文释义</span><h3 id="cardMeaning">减轻；减少</h3><p id="cardGroup">同义词组：减弱</p><small>点击返回单词</small></div>
               </div>
             </button>
             <div class="flash-actions"><button id="cardForgot">忘记了 <kbd>1</kbd></button><button id="cardFuzzy">有点模糊 <kbd>2</kbd></button><button class="primary" id="cardKnow">认识它 <kbd>3</kbd></button></div>
@@ -143,6 +174,17 @@
       <div class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="searchInput" placeholder="搜索单词、词根或中文释义…" /><button id="closeSearch">ESC</button></div>
     </div>
     <div class="toast" id="toast" role="status"></div>
+    <dialog class="editor-dialog" id="synonymEditor">
+      <form method="dialog" id="synonymForm">
+        <div class="dialog-head"><div><p class="eyebrow">CUSTOM COLLECTION</p><h2 id="editorTitle">新建同义词组</h2></div><button value="cancel" class="dialog-close" aria-label="关闭">×</button></div>
+        <input type="hidden" id="editingGroupId" />
+        <div class="form-grid"><label>组别名称<input id="groupMeaning" required placeholder="例如：赞扬称颂" /></label><label>分类<input id="groupCategory" required placeholder="例如：表达" /></label></div>
+        <label>辨析笔记<textarea id="groupNote" rows="3" required placeholder="记录这组词在语气和使用场景上的差别"></textarea></label>
+        <div class="word-editor-head"><b>组内单词</b><button type="button" id="addWordRow">＋ 添加单词</button></div>
+        <div id="wordEditorRows"></div>
+        <div class="dialog-actions"><button value="cancel" class="cancel-dialog">取消</button><button type="submit" value="default" class="save-group">保存组别</button></div>
+      </form>
+    </dialog>
     <script src="app.js"></script>
   </body>
 </html>
