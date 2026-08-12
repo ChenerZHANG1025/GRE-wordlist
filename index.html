@@ -86,15 +86,15 @@
               </div>
               <div class="tab-panel" id="rootsPanel">
                 <p class="panel-label">ROOT STORY · 拆解联想</p>
-                <div class="root-formula"><b>equi</b><span>相等</span><strong>+</strong><b>voc</b><span>声音</span><strong>+</strong><b>al</b><span>形容词</span></div>
-                <p class="root-note">两种“声音”分量相等，让人无法判断立场 → 模棱两可的。</p>
-                <div class="word-family"><span>同根词</span><button>equivocate <small>v. 含糊其辞</small></button><button>equivocation <small>n. 模棱两可</small></button></div>
+                <div class="root-formula" id="studyRootFormula"></div>
+                <p class="root-note" id="studyRootNote"></p>
+                <div class="word-family" id="studyFamily"></div>
               </div>
               <div class="tab-panel" id="examplesPanel">
                 <p class="panel-label">CONTEXT · 语境记忆</p>
                 <blockquote id="studyExample">Use <mark>abate</mark> in a sentence to strengthen active recall.</blockquote>
                 <p class="translation" id="studyTranslation">尝试先自己造句，再查看释义。</p>
-                <button class="quiz-button" id="quizButton">查看 GRE 例题 <span>→</span></button>
+                <button class="quiz-button" id="quizButton">查看参考译文 <span>→</span></button>
               </div>
 
               <div class="word-footer">
@@ -142,7 +142,7 @@
           </div>
           <div class="synonym-toolbar">
             <label class="library-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="synonymSearch" type="search" placeholder="搜索含义或单词…" /></label>
-            <div class="category-chips" id="synonymCategories"></div>
+            <div class="synonym-tools"><div class="category-chips" id="synonymCategories"></div><button class="add-group-button" id="addGroupButton">＋ 新建组别</button></div>
           </div>
           <div class="synonym-grid" id="synonymGrid"></div>
         </section>
@@ -174,6 +174,17 @@
       <div class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="searchInput" placeholder="搜索单词、词根或中文释义…" /><button id="closeSearch">ESC</button></div>
     </div>
     <div class="toast" id="toast" role="status"></div>
+    <dialog class="editor-dialog" id="synonymEditor">
+      <form method="dialog" id="synonymForm">
+        <div class="dialog-head"><div><p class="eyebrow">CUSTOM COLLECTION</p><h2 id="editorTitle">新建同义词组</h2></div><button value="cancel" class="dialog-close" aria-label="关闭">×</button></div>
+        <input type="hidden" id="editingGroupId" />
+        <div class="form-grid"><label>组别名称<input id="groupMeaning" required placeholder="例如：赞扬称颂" /></label><label>分类<input id="groupCategory" required placeholder="例如：表达" /></label></div>
+        <label>辨析笔记<textarea id="groupNote" rows="3" required placeholder="记录这组词在语气和使用场景上的差别"></textarea></label>
+        <div class="word-editor-head"><b>组内单词</b><button type="button" id="addWordRow">＋ 添加单词</button></div>
+        <div id="wordEditorRows"></div>
+        <div class="dialog-actions"><button value="cancel" class="cancel-dialog">取消</button><button type="submit" value="default" class="save-group">保存组别</button></div>
+      </form>
+    </dialog>
     <script src="app.js"></script>
   </body>
 </html>
