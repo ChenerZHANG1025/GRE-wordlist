@@ -1,4 +1,4 @@
-const mistakes = [
+let mistakes = [
   { word: "equivocal", phonetic: "/ɪˈkwɪvəkəl/", meaning: "模棱两可的", errors: 5, last: "今天" },
   { word: "laconic", phonetic: "/ləˈkɒnɪk/", meaning: "言简意赅的", errors: 3, last: "昨天" },
   { word: "prodigal", phonetic: "/ˈprɒdɪɡəl/", meaning: "挥霍的；浪费的", errors: 2, last: "3 天前" },
@@ -33,6 +33,33 @@ const synonymGroups = [
 ];
 const views = { learn: document.querySelector("#learnView"), vocabulary: document.querySelector("#vocabularyView"), synonyms: document.querySelector("#synonymsView"), cards: document.querySelector("#cardsView"), mistakes: document.querySelector("#mistakesView") };
 const toast = document.querySelector("#toast");
+const DAILY_GOAL = 200;
+const orderedVocabulary = [...vocabulary].sort((a, b) => a.word.localeCompare(b.word));
+const todayKey = new Date().toISOString().slice(0, 10);
+const savedProgress = JSON.parse(localStorage.getItem("vocabloom-progress") || "null");
+const progress = savedProgress?.date === todayKey ? savedProgress : { date: todayKey, index: 0, learned: 0, reviewed: [], bookmarks: [] };
+const savedMistakes = JSON.parse(localStorage.getItem("vocabloom-mistakes") || "null");
+if (Array.isArray(savedMistakes)) mistakes = savedMistakes;
+function saveProgress() { localStorage.setItem("vocabloom-progress", JSON.stringify(progress)); localStorage.setItem("vocabloom-mistakes", JSON.stringify(mistakes)); }
+function currentWord() { return orderedVocabulary[progress.index % orderedVocabulary.length]; }
+function wordGroup(item) { return synonymGroups.find((group) => group.words.some(([word]) => word === item.word)) || synonymGroups.find((group) => group.meaning.includes(item.group)); }
+function renderStudy() {
+  const item = currentWord(); const index = orderedVocabulary.indexOf(item); const group = wordGroup(item); const percent = Math.min(100, Math.round(progress.learned / DAILY_GOAL * 100));
+  document.querySelector("#studySequence").textContent = `GRE 核心 · NO. ${String(index + 1).padStart(4, "0")} · A–Z`;
+  document.querySelector("#studyWord").textContent = item.word; document.querySelector("#studyPhonetic").textContent = item.phonetic; document.querySelector("#studyMeaning").textContent = item.meaning;
+  document.querySelector("#studyOrderHint").textContent = `按字母顺序学习 · ${item.word[0].toUpperCase()}`;
+  document.querySelector("#studySynonyms").innerHTML = group ? group.words.slice(0, 3).map(([word, meaning]) => `<div class="${word === item.word ? "highlight" : ""}"><b>${word}</b><span>${meaning}</span></div>`).join("<i></i>") : `<div class="highlight"><b>${item.word}</b><span>${item.group}</span></div>`;
+  document.querySelector("#studyTip").textContent = group?.note || `把 ${item.word} 与“${item.meaning}”一起朗读。`; document.querySelector("#studyExample").innerHTML = `Use <mark>${item.word}</mark> in a sentence to strengthen active recall.`;
+  document.querySelector("#dailyPercent").textContent = `${percent}%`; document.querySelector("#dailyProgress").setAttribute("aria-label", `今日进度 ${percent}%`); document.querySelector("#dailyProgressRing").style.background = `radial-gradient(circle,#fffdf2 59%,transparent 61%),conic-gradient(var(--green-dark) ${percent}%,#e4e8dc 0)`;
+  document.querySelector("#todayLearned").textContent = progress.learned; document.querySelector("#dailyMessage").textContent = progress.learned >= DAILY_GOAL ? "今日 200 词目标已完成，做得漂亮！" : `今日还剩 ${DAILY_GOAL - progress.learned} 个单词，按字母顺序继续学习。`;
+  document.querySelector("#totalLearned").textContent = progress.reviewed.length; document.querySelector("#learnedMeter").style.width = `${Math.min(100, progress.reviewed.length / WORD_TOTAL * 100)}%`; document.querySelector("#weekLearned").textContent = progress.learned;
+  document.querySelector("#bookmarkButton").classList.toggle("active", progress.bookmarks.includes(item.word)); document.querySelector("#cardSequence").textContent = `GRE CORE · ${String(index + 1).padStart(4, "0")} · A–Z`; document.querySelector("#cardWord").textContent = item.word; document.querySelector("#cardPhonetic").textContent = item.phonetic; document.querySelector("#cardMeaning").textContent = item.meaning; document.querySelector("#cardGroup").textContent = `同义词组：${item.group}`; document.querySelector("#cardSessionCount").textContent = `今日 ${progress.learned} / ${DAILY_GOAL}`;
+}
+function recordAnswer(remembered) {
+  const item = currentWord(); if (!progress.reviewed.includes(item.word)) progress.reviewed.push(item.word); if (progress.learned < DAILY_GOAL) progress.learned += 1;
+  if (!remembered) { const mistake = mistakes.find((entry) => entry.word === item.word); if (mistake) { mistake.errors += 1; mistake.last = "今天"; } else mistakes.unshift({ word: item.word, phonetic: item.phonetic, meaning: item.meaning, errors: 1, last: "今天" }); }
+  progress.index = (progress.index + 1) % orderedVocabulary.length; saveProgress(); renderStudy(); renderMistakes(); renderVocabulary(); showToast(remembered ? "记忆成功，继续下一个字母序单词" : "已记录到易错本，继续下一个单词");
+}
 
 function showToast(message) {
   toast.textContent = message;
@@ -82,9 +109,9 @@ function renderVocabulary() {
   const filtered = vocabulary.filter((item) => (selectedLetter === "全部" || item.word.startsWith(selectedLetter.toLowerCase())) && `${item.word} ${item.meaning}`.toLowerCase().includes(query));
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   wordPage = Math.min(wordPage, pages - 1);
-  document.querySelector("#wordLibraryList").innerHTML = filtered.slice(wordPage * pageSize, (wordPage + 1) * pageSize).map((item) => `
-    <div class="library-row"><div class="library-word"><button class="word-sound" data-speak="${item.word}">⌁</button><div><b>${item.word}</b><span>${item.phonetic} · ${item.meaning}</span></div></div><button class="group-link" data-group="${item.group}">${item.group}词组 →</button><span class="status-pill ${item.status === "已学习" ? "learned" : item.status === "待复习" ? "review" : ""}">${item.status}</span></div>
-  `).join("") || `<div class="empty-state">没有找到匹配的词汇</div>`;
+  document.querySelector("#wordLibraryList").innerHTML = filtered.slice(wordPage * pageSize, (wordPage + 1) * pageSize).map((item) => { const status = progress.reviewed.includes(item.word) ? "已学习" : mistakes.some((entry) => entry.word === item.word) ? "待复习" : "未学习"; return `
+    <div class="library-row"><div class="library-word"><button class="word-sound" data-speak="${item.word}">⌁</button><div><b>${item.word}</b><span>${item.phonetic} · ${item.meaning}</span></div></div><button class="group-link" data-group="${item.group}">${item.group}词组 →</button><span class="status-pill ${status === "已学习" ? "learned" : status === "待复习" ? "review" : ""}">${status}</span></div>
+  `; }).join("") || `<div class="empty-state">没有找到匹配的词汇</div>`;
   document.querySelector("#wordPageInfo").textContent = `第 ${wordPage + 1} / ${pages} 页 · 当前展示 ${filtered.length} 词`;
   document.querySelector("#previousWords").disabled = wordPage === 0;
   document.querySelector("#nextWords").disabled = wordPage >= pages - 1;
@@ -117,17 +144,26 @@ document.querySelector("#closeSearch").addEventListener("click", closeSearch);
 overlay.addEventListener("click", (event) => { if (event.target === overlay) closeSearch(); });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeSearch(); });
 
-document.querySelector("#bookmarkButton").addEventListener("click", (event) => { event.currentTarget.classList.toggle("active"); showToast(event.currentTarget.classList.contains("active") ? "已收藏 equivocal" : "已取消收藏"); });
-document.querySelector("#soundButton").addEventListener("click", () => { if ("speechSynthesis" in window) { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance("equivocal")); } showToast("正在播放发音"); });
-document.querySelector("#knowButton").addEventListener("click", () => showToast("真棒！今日进度 +1"));
-document.querySelector("#forgotButton").addEventListener("click", () => showToast("已加入今日复习队列"));
+document.querySelector("#bookmarkButton").addEventListener("click", () => { const word = currentWord().word; const index = progress.bookmarks.indexOf(word); if (index >= 0) progress.bookmarks.splice(index, 1); else progress.bookmarks.push(word); saveProgress(); renderStudy(); showToast(index >= 0 ? "已取消收藏" : `已收藏 ${word}`); });
+document.querySelector("#soundButton").addEventListener("click", () => { if ("speechSynthesis" in window) { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(currentWord().word)); } showToast("正在播放发音"); });
+document.querySelector("#knowButton").addEventListener("click", () => recordAnswer(true));
+document.querySelector("#forgotButton").addEventListener("click", () => recordAnswer(false));
 document.querySelector("#quizButton").addEventListener("click", () => showToast("例题模块即将展开"));
 
 const flashcard = document.querySelector("#flashcard");
 flashcard.addEventListener("click", () => flashcard.classList.toggle("flipped"));
-[["#cardForgot", "已记录错误，稍后会再次出现"], ["#cardFuzzy", "已标记为模糊"], ["#cardKnow", "回答正确，继续保持！"]].forEach(([selector, message]) => document.querySelector(selector).addEventListener("click", () => { flashcard.classList.remove("flipped"); showToast(message); }));
+document.querySelector("#cardForgot").addEventListener("click", () => { flashcard.classList.remove("flipped"); recordAnswer(false); });
+document.querySelector("#cardFuzzy").addEventListener("click", () => { flashcard.classList.remove("flipped"); recordAnswer(false); });
+document.querySelector("#cardKnow").addEventListener("click", () => { flashcard.classList.remove("flipped"); recordAnswer(true); });
+document.addEventListener("keydown", (event) => {
+  if (!views.cards.classList.contains("active") || ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+  if (event.key === "1" || event.key === "2") { flashcard.classList.remove("flipped"); recordAnswer(false); }
+  if (event.key === "3") { flashcard.classList.remove("flipped"); recordAnswer(true); }
+  if (event.code === "Space") { event.preventDefault(); flashcard.classList.toggle("flipped"); }
+});
 document.querySelectorAll(".filter").forEach((filter) => filter.addEventListener("click", () => { document.querySelectorAll(".filter").forEach((item) => item.classList.remove("active")); filter.classList.add("active"); showToast(`已切换：${filter.textContent}`); }));
 
 renderMistakes();
 renderVocabulary();
 renderSynonyms();
+renderStudy();
