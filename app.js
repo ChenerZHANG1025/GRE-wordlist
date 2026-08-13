@@ -2,8 +2,18 @@ let mistakes = [];
 
 let WORD_TOTAL = 0;
 let vocabulary = [];
+const defaultSynonymGroups = [
+  { id: "clarity", meaning: "含糊不清", category: "表达", note: "从客观歧义到刻意回避，注意说话者是否有主观意图。", words: [["ambiguous", "有多种解释"], ["equivocal", "刻意含糊"], ["vague", "不够明确"], ["obscure", "晦涩难懂"]] },
+  { id: "brevity", meaning: "言简意赅", category: "表达", note: "都表示用词少；laconic 有时带有冷淡、寡言的语气。", words: [["concise", "简洁清楚"], ["succinct", "简明扼要"], ["laconic", "少言简短"], ["terse", "简短生硬"]] },
+  { id: "lessen", meaning: "减轻缓和", category: "变化", note: "可用于强度、痛苦、担忧、冲突或危害程度的降低。", words: [["abate", "强度减弱"], ["alleviate", "减轻痛苦"], ["assuage", "缓和情绪"], ["mitigate", "缓解危害"]] },
+  { id: "abnormal", meaning: "异常反常", category: "性质", note: "强调偏离规则、常态或预期。", words: [["aberrant", "偏离常规"], ["anomalous", "不合规则"], ["atypical", "非典型"], ["deviant", "背离规范"]] },
+  { id: "hate", meaning: "憎恨厌恶", category: "情感", note: "强度由一般反感逐渐上升到深恶痛绝。", words: [["dislike", "不喜欢"], ["loathe", "强烈厌恶"], ["abhor", "深恶痛绝"], ["detest", "极为憎恨"]] },
+  { id: "praise", meaning: "赞扬称颂", category: "表达", note: "commend 偏正式认可，extol 与 laud 表示高度赞扬。", words: [["commend", "称赞；推荐"], ["extol", "热情颂扬"], ["laud", "公开赞美"], ["acclaim", "公开称颂"]] },
+  { id: "stubborn", meaning: "固执顽强", category: "性格", note: "obstinate 与 intransigent 常含贬义；tenacious 也可表示值得肯定的坚持。", words: [["obstinate", "顽固不化"], ["intransigent", "不愿妥协"], ["tenacious", "坚韧坚持"], ["adamant", "坚定不移"]] },
+  { id: "poor", meaning: "贫穷匮乏", category: "状态", note: "impecunious 强调没钱，indigent 强调生活贫困。", words: [["impecunious", "身无分文"], ["indigent", "贫困的"], ["destitute", "一无所有"], ["impoverished", "贫困化的"]] }
+];
 const storedSynonymGroups = JSON.parse(localStorage.getItem("vocabloom-synonym-groups") || "null");
-let synonymGroups = Array.isArray(storedSynonymGroups) ? storedSynonymGroups : [];
+let synonymGroups = Array.isArray(storedSynonymGroups) && storedSynonymGroups.length ? storedSynonymGroups : defaultSynonymGroups;
 const views = { learn: document.querySelector("#learnView"), vocabulary: document.querySelector("#vocabularyView"), synonyms: document.querySelector("#synonymsView"), cards: document.querySelector("#cardsView"), mistakes: document.querySelector("#mistakesView") };
 const toast = document.querySelector("#toast");
 const DAILY_GOAL = 200;
@@ -20,25 +30,25 @@ function renderStudy() {
   const item = currentWord();
   if (!item) return; const index = orderedVocabulary.indexOf(item); const group = wordGroup(item); const percent = Math.min(100, Math.round(progress.learned / DAILY_GOAL * 100));
   document.querySelector("#studySequence").textContent = `GRE 核心 · NO. ${String(index + 1).padStart(4, "0")} · A–Z`;
-  document.querySelector("#studyWord").textContent = item.word; document.querySelector("#studyPhonetic").textContent = item.phonetic || "音标未提供"; document.querySelector("#studyMeaning").textContent = item.chineseMeaning;
+  document.querySelector("#studyWord").textContent = item.word; document.querySelector("#studyPartOfSpeech").textContent = item.partOfSpeech || "GRE WORD"; document.querySelector("#studyMeaning").textContent = item.chineseMeaning;
   document.querySelector("#studyOrderHint").textContent = `按字母顺序学习 · ${item.word[0].toUpperCase()}`;
   document.querySelector("#studySynonyms").innerHTML = group ? group.words.slice(0, 3).map(([word, meaning]) => `<div class="${word === item.word ? "highlight" : ""}"><b>${word}</b><span>${meaning}</span></div>`).join("<i></i>") : `<div class="highlight"><b>${item.word}</b><span>${item.partOfSpeech || "未分组"}</span></div>`;
   document.querySelector("#studyTip").textContent = group?.note || `把 ${item.word} 与“${item.chineseMeaning}”一起朗读。`;
-  const roots = item.root ? [item.root] : [];
-  document.querySelector("#studyRootFormula").innerHTML = roots.length ? roots.map((root) => `<b>${root}</b>`).join("<strong>+</strong>") : `<span class="source-empty">PDF 未提供词根信息</span>`;
-  document.querySelector("#studyRootNote").textContent = roots.length ? "以下内容来自 PDF。" : "为避免编造信息，此字段保持为空。";
-  document.querySelector("#studyFamily").innerHTML = item.wordFamily?.length ? `<span>同根词</span>${item.wordFamily.map((word) => `<button>${word}</button>`).join("")}` : `<span>PDF 未提供同根词</span>`;
-  document.querySelector("#studyExample").innerHTML = item.example ? item.example.replace(new RegExp(`(${item.word})`, "i"), "<mark>$1</mark>") : `<span class="source-empty">PDF 未提供例句</span>`;
-  document.querySelector("#studyTranslation").textContent = item.englishMeaning || "原始 PDF 仅提供词性与中文释义。";
+  const enrichment = window.VOCABLOOM_ENRICHMENT?.[item.word];
+  document.querySelector("#studyRootFormula").innerHTML = enrichment ? enrichment.roots.map(([root, meaning]) => `<b>${root}</b><span>${meaning}</span>`).join("<strong>+</strong>") : `<span class="source-empty">该词的词源内容正在整理</span>`;
+  document.querySelector("#studyRootNote").textContent = enrichment?.rootNote || "你仍可先通过中文释义和同义词完成记忆。";
+  document.querySelector("#studyFamily").innerHTML = enrichment?.family?.length ? `<span>同根词</span>${enrichment.family.map(([word, meaning]) => `<button>${word} <small>${meaning}</small></button>`).join("")}` : `<span>暂无同根词条目</span>`;
+  document.querySelector("#studyExample").innerHTML = enrichment ? enrichment.example.replace(new RegExp(`(${item.word})`, "i"), "<mark>$1</mark>") : `<span class="source-empty">该词的例句正在整理</span>`;
+  document.querySelector("#studyTranslation").textContent = enrichment?.translation || "暂无参考译文。";
   document.querySelector("#studyTranslation").classList.remove("revealed");
   document.querySelector("#dailyPercent").textContent = `${percent}%`; document.querySelector("#dailyProgress").setAttribute("aria-label", `今日进度 ${percent}%`); document.querySelector("#dailyProgressRing").style.background = `radial-gradient(circle,#fffdf2 59%,transparent 61%),conic-gradient(var(--green-dark) ${percent}%,#e4e8dc 0)`;
   document.querySelector("#todayLearned").textContent = progress.learned; document.querySelector("#dailyMessage").textContent = progress.learned >= DAILY_GOAL ? "今日 200 词目标已完成，做得漂亮！" : `今日还剩 ${DAILY_GOAL - progress.learned} 个单词，按字母顺序继续学习。`;
   document.querySelector("#totalLearned").textContent = progress.reviewed.length; document.querySelector("#learnedMeter").style.width = `${Math.min(100, progress.reviewed.length / WORD_TOTAL * 100)}%`; document.querySelector("#weekLearned").textContent = progress.learned;
-  document.querySelector("#bookmarkButton").classList.toggle("active", progress.bookmarks.includes(item.word)); document.querySelector("#cardSequence").textContent = `GRE CORE · ${String(index + 1).padStart(4, "0")} · A–Z`; document.querySelector("#cardWord").textContent = item.word; document.querySelector("#cardPhonetic").textContent = item.phonetic || "音标未提供"; document.querySelector("#cardMeaning").textContent = item.chineseMeaning; document.querySelector("#cardGroup").textContent = `词性：${item.partOfSpeech || "PDF 未提供"}`; document.querySelector("#cardSessionCount").textContent = `今日 ${progress.learned} / ${DAILY_GOAL}`;
+  document.querySelector("#bookmarkButton").classList.toggle("active", progress.bookmarks.includes(item.word)); document.querySelector("#cardSequence").textContent = `GRE CORE · ${String(index + 1).padStart(4, "0")} · A–Z`; document.querySelector("#cardWord").textContent = item.word; document.querySelector("#cardPartOfSpeech").textContent = item.partOfSpeech || "GRE WORD"; document.querySelector("#cardMeaning").textContent = item.chineseMeaning; document.querySelector("#cardGroup").textContent = `词性：${item.partOfSpeech || "PDF 未提供"}`; document.querySelector("#cardSessionCount").textContent = `今日 ${progress.learned} / ${DAILY_GOAL}`;
 }
 function recordAnswer(remembered) {
   const item = currentWord(); if (!progress.reviewed.includes(item.word)) progress.reviewed.push(item.word); if (progress.learned < DAILY_GOAL) progress.learned += 1;
-  if (!remembered) { const mistake = mistakes.find((entry) => entry.word === item.word); if (mistake) { mistake.errors += 1; mistake.last = "今天"; } else mistakes.unshift({ word: item.word, phonetic: item.phonetic || "音标未提供", meaning: item.chineseMeaning, errors: 1, last: "今天" }); }
+  if (!remembered) { const mistake = mistakes.find((entry) => entry.word === item.word); if (mistake) { mistake.errors += 1; mistake.last = "今天"; } else mistakes.unshift({ word: item.word, meaning: item.chineseMeaning, errors: 1, last: "今天" }); }
   progress.index = (progress.index + 1) % orderedVocabulary.length; saveProgress(); renderStudy(); renderMistakes(); renderVocabulary(); showToast(remembered ? "记忆成功，继续下一个字母序单词" : "已记录到易错本，继续下一个单词");
 }
 
@@ -71,7 +81,7 @@ function renderMistakes() {
   `).join("");
   document.querySelector("#mistakeList").innerHTML = mistakes.map((item) => `
     <div class="mistake-row">
-      <div class="mistake-word"><b>${item.word}</b><span>${item.phonetic || "音标未提供"}</span></div>
+      <div class="mistake-word"><b>${item.word}</b><span>GRE 易错词</span></div>
       <div class="mistake-meaning">${item.meaning}</div>
       <div class="mistake-errors"><strong>${item.errors}</strong> 次错误<br><small>${item.last}</small></div>
       <button class="review-button" data-word="${item.word}">立即复习</button>
@@ -91,7 +101,7 @@ function renderVocabulary() {
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   wordPage = Math.min(wordPage, pages - 1);
   document.querySelector("#wordLibraryList").innerHTML = filtered.slice(wordPage * pageSize, (wordPage + 1) * pageSize).map((item) => { const status = progress.reviewed.includes(item.word) ? "已学习" : mistakes.some((entry) => entry.word === item.word) ? "待复习" : "未学习"; return `
-    <div class="library-row"><div class="library-word"><button class="word-sound" data-speak="${item.word}">⌁</button><div><b>${item.word}</b><span>${item.partOfSpeech || "词性未提供"} · ${item.chineseMeaning}</span></div></div><span class="source-field">${item.phonetic || "PDF 未提供音标"}</span><span class="status-pill ${status === "已学习" ? "learned" : status === "待复习" ? "review" : ""}">${status}</span></div>
+    <div class="library-row"><div class="library-word"><button class="word-sound" data-speak="${item.word}">⌁</button><div><b>${item.word}</b><span>${item.partOfSpeech || "词性未提供"} · ${item.chineseMeaning}</span></div></div><span class="status-pill ${status === "已学习" ? "learned" : status === "待复习" ? "review" : ""}">${status}</span></div>
   `; }).join("") || `<div class="empty-state">没有找到匹配的词汇</div>`;
   document.querySelector("#wordPageInfo").textContent = `第 ${wordPage + 1} / ${pages} 页 · 当前展示 ${filtered.length} 词`;
   document.querySelector("#previousWords").disabled = wordPage === 0;

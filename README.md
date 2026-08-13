@@ -30,3 +30,5 @@ python3 -m http.server 8000
 ```bash
 python3 scripts/build_offline_data.py
 ```
+
+`data/enrichment.js` 保存人工校订的词根词缀、同根词、例句和译文扩展内容。网站不会显示音标；尚未完成扩展的词条会保留“正在整理”提示。同义词页面内置了可继续编辑的入门词组，并继续使用浏览器本地存储保存个人修改。
