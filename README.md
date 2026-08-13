@@ -20,3 +20,13 @@ python3 -m http.server 8000
 ```
 
 打开 `http://localhost:8000` 即可体验。
+
+## 打开方式
+
+推荐通过 `python3 -m http.server 8000` 启动，此时网站读取 `data/words.json`。也可以直接双击 `index.html`：浏览器在 `file://` 模式下禁止 `fetch` 本地 JSON，因此页面会自动改用由同一份 JSON 生成的 `data/words.js` 离线副本。
+
+如果修改了 `data/words.json`，请同步更新离线副本：
+
+```bash
+python3 scripts/build_offline_data.py
+```

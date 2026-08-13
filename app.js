@@ -177,9 +177,12 @@ document.querySelectorAll(".filter").forEach((filter) => filter.addEventListener
 
 async function initializeApp() {
   try {
-    const response = await fetch("data/words.json");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
+    let payload = window.VOCABLOOM_WORDS;
+    if (!payload) {
+      const response = await fetch("data/words.json");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      payload = await response.json();
+    }
     vocabulary = payload.words;
     WORD_TOTAL = payload.metadata.cleanEntries;
     orderedVocabulary = [...vocabulary].sort((a, b) => a.word.localeCompare(b.word));
@@ -188,7 +191,7 @@ async function initializeApp() {
     document.querySelector("#librarySourceNote").textContent = `已从 PDF 解析 ${payload.metadata.pdfPages} 页 · ${payload.metadata.uniqueWords.toLocaleString()} 个唯一词条`;
     renderMistakes(); renderVocabulary(); renderSynonymCategories(); renderSynonyms(); renderStudy();
   } catch (error) {
-    document.querySelector("#dailyMessage").textContent = "真实词库加载失败，请通过本地 HTTP 服务运行网站。";
+    document.querySelector("#dailyMessage").textContent = "真实词库加载失败，请确认 data/words.json 和 data/words.js 均在 data 目录中。";
     showToast(`词库加载失败：${error.message}`);
   }
 }
